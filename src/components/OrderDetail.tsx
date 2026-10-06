@@ -14,10 +14,14 @@ export default function OrderDetail({
   order,
   onAction,
   onAssess,
+  canAction,
+  canAssess,
 }: {
   order: WorkOrder;
   onAction: (order: WorkOrder, action: string) => void;
   onAssess: (order: WorkOrder, level: Difficulty, reason: string, kind: 'INITIAL' | 'IH') => void;
+  canAction: (action: string) => boolean;
+  canAssess: (kind: 'INITIAL' | 'IH') => boolean;
 }) {
   const [level, setLevel] = useState<Difficulty>(1);
   const [reason, setReason] = useState('');
@@ -29,6 +33,15 @@ export default function OrderDetail({
     onAssess(order, level, reason, kind);
     setReason('');
   };
+
+  const hasWritableStep =
+    (order.stage === 'UNIT_RECEIVED' && canAssess('INITIAL')) ||
+    (order.stage === 'IH_ASSESS' && canAssess('IH')) ||
+    [
+      'RS_ACCEPT','UNIT_ACCEPT','INTERNAL_DONE','SEND_TO_IH','RS_ACCEPT_IH','RS_SEND_IH',
+      'IH_ACCEPT','IH_DONE','UNIT_ACCEPT_IH','UNIT_APPROVE_IH','IH_REVISION',
+      'RS_ACCEPT_RETURN','SEND_SAFETY','CLOSE',
+    ].some(canAction);
 
   return (
     <div>
@@ -65,32 +78,33 @@ export default function OrderDetail({
 
       <section className="action-zone">
         <h3>ดำเนินการขั้นถัดไป</h3>
-        {order.stage === 'UNIT_RECEIVED' && (
+        {order.stage === 'UNIT_RECEIVED' && canAssess('INITIAL') && (
           <AssessmentForm level={level} setLevel={setLevel} reason={reason} setReason={setReason} onSubmit={() => submitAssessment('INITIAL')} button="บันทึกการประเมินและเริ่มงาน" />
         )}
-        {order.stage === 'IH_ASSESS' && (
+        {order.stage === 'IH_ASSESS' && canAssess('IH') && (
           <AssessmentForm level={level} setLevel={setLevel} reason={reason} setReason={setReason} onSubmit={() => submitAssessment('IH')} button="บันทึกการประเมิน IH และเริ่มงาน" />
         )}
         <div className="action-buttons">
-          {order.stage === 'OFFICE_RECEIVED' && <button className="button primary" onClick={() => onAction(order, 'RS_ACCEPT')}>{order.routeTeam} รับเรื่อง</button>}
-          {order.stage === 'RS_RECEIVED' && <button className="button primary" onClick={() => onAction(order, 'UNIT_ACCEPT')}>{order.ownerUnit} รับเรื่อง</button>}
+          {order.stage === 'OFFICE_RECEIVED' && canAction('RS_ACCEPT') && <button className="button primary" onClick={() => onAction(order, 'RS_ACCEPT')}>{order.routeTeam} รับเรื่อง</button>}
+          {order.stage === 'RS_RECEIVED' && canAction('UNIT_ACCEPT') && <button className="button primary" onClick={() => onAction(order, 'UNIT_ACCEPT')}>{order.ownerUnit} รับเรื่อง</button>}
           {order.stage === 'INTERNAL_WORK' && <>
-            <button className="button primary" onClick={() => onAction(order, 'INTERNAL_DONE')}>หน่วยทำเสร็จและส่งออก</button>
-            <button className="button secondary" onClick={() => onAction(order, 'SEND_TO_IH')}>ส่งให้ In-house Consultant</button>
+            {canAction('INTERNAL_DONE') && <button className="button primary" onClick={() => onAction(order, 'INTERNAL_DONE')}>หน่วยทำเสร็จและส่งออก</button>}
+            {canAction('SEND_TO_IH') && <button className="button secondary" onClick={() => onAction(order, 'SEND_TO_IH')}>ส่งให้ In-house Consultant</button>}
           </>}
-          {order.stage === 'IH_WAIT_RS_ACCEPT' && <button className="button primary" onClick={() => onAction(order, 'RS_ACCEPT_IH')}>{order.routeTeam} รับเรื่องเพื่อส่ง IH</button>}
-          {order.stage === 'IH_WAIT_SEND' && <button className="button primary" onClick={() => onAction(order, 'RS_SEND_IH')}>{order.routeTeam} ส่งให้ IH</button>}
-          {order.stage === 'IH_WAIT_RECEIVE' && <button className="button primary" onClick={() => onAction(order, 'IH_ACCEPT')}>IH ยืนยันรับงานจริง</button>}
-          {order.stage === 'IH_WORK' && <button className="button primary" onClick={() => onAction(order, 'IH_DONE')}>IH ทำงานแล้วเสร็จและส่งกลับ</button>}
-          {order.stage === 'IH_SUBMITTED' && <button className="button primary" onClick={() => onAction(order, 'UNIT_ACCEPT_IH')}>{order.ownerUnit} รับงานเพื่อตรวจ</button>}
+          {order.stage === 'IH_WAIT_RS_ACCEPT' && canAction('RS_ACCEPT_IH') && <button className="button primary" onClick={() => onAction(order, 'RS_ACCEPT_IH')}>{order.routeTeam} รับเรื่องเพื่อส่ง IH</button>}
+          {order.stage === 'IH_WAIT_SEND' && canAction('RS_SEND_IH') && <button className="button primary" onClick={() => onAction(order, 'RS_SEND_IH')}>{order.routeTeam} ส่งให้ IH</button>}
+          {order.stage === 'IH_WAIT_RECEIVE' && canAction('IH_ACCEPT') && <button className="button primary" onClick={() => onAction(order, 'IH_ACCEPT')}>IH ยืนยันรับงานจริง</button>}
+          {order.stage === 'IH_WORK' && canAction('IH_DONE') && <button className="button primary" onClick={() => onAction(order, 'IH_DONE')}>IH ทำงานแล้วเสร็จและส่งกลับ</button>}
+          {order.stage === 'IH_SUBMITTED' && canAction('UNIT_ACCEPT_IH') && <button className="button primary" onClick={() => onAction(order, 'UNIT_ACCEPT_IH')}>{order.ownerUnit} รับงานเพื่อตรวจ</button>}
           {order.stage === 'UNIT_REVIEW_IH' && <>
-            <button className="button primary" onClick={() => onAction(order, 'UNIT_APPROVE_IH')}>ตรวจผ่านและส่งออก</button>
-            <button className="button secondary" onClick={() => onAction(order, 'IH_REVISION')}>ส่งกลับ IH แก้ไข</button>
+            {canAction('UNIT_APPROVE_IH') && <button className="button primary" onClick={() => onAction(order, 'UNIT_APPROVE_IH')}>ตรวจผ่านและส่งออก</button>}
+            {canAction('IH_REVISION') && <button className="button secondary" onClick={() => onAction(order, 'IH_REVISION')}>ส่งกลับ IH แก้ไข</button>}
           </>}
-          {order.stage === 'RETURN_WAIT_RS_ACCEPT' && <button className="button primary" onClick={() => onAction(order, 'RS_ACCEPT_RETURN')}>{order.routeTeam} รับงานกลับ</button>}
-          {order.stage === 'RETURN_RS_RECEIVED' && <button className="button primary" onClick={() => onAction(order, 'SEND_SAFETY')}>ส่งกลับ {order.sourceAgency}</button>}
-          {order.stage === 'SENT_TO_SAFETY' && <button className="button primary" onClick={() => onAction(order, 'CLOSE')}>ยืนยันรับและปิดงาน</button>}
+          {order.stage === 'RETURN_WAIT_RS_ACCEPT' && canAction('RS_ACCEPT_RETURN') && <button className="button primary" onClick={() => onAction(order, 'RS_ACCEPT_RETURN')}>{order.routeTeam} รับงานกลับ</button>}
+          {order.stage === 'RETURN_RS_RECEIVED' && canAction('SEND_SAFETY') && <button className="button primary" onClick={() => onAction(order, 'SEND_SAFETY')}>ส่งกลับ {order.sourceAgency}</button>}
+          {order.stage === 'SENT_TO_SAFETY' && canAction('CLOSE') && <button className="button primary" onClick={() => onAction(order, 'CLOSE')}>ยืนยันรับและปิดงาน</button>}
           {order.stage === 'CLOSED' && <span className="closed-note">งานนี้ปิดแล้ว และ Timeline ยังคงเก็บครบถ้วน</span>}
+          {order.stage !== 'CLOSED' && !hasWritableStep && <span className="readonly-note">บัญชีนี้มีสิทธิ์ดูข้อมูล แต่ไม่มีสิทธิ์ดำเนินการขั้นตอนปัจจุบัน</span>}
         </div>
         {order.ihDueAt && ihLeft !== null && ['IH_ASSESS', 'IH_WORK', 'IH_SUBMITTED', 'UNIT_REVIEW_IH'].includes(order.stage) && (
           <div className="ih-sla-note">กรอบ IH: {formatThaiDate(order.ihDueAt)} · {ihLeft < 0 ? `เกิน ${Math.abs(ihLeft)} วัน` : `เหลือ ${ihLeft} วัน`}</div>

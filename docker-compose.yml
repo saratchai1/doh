@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-doh}
+      POSTGRES_USER: ${POSTGRES_USER:-doh}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - doh_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-doh} -d ${POSTGRES_DB:-doh}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-doh}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-doh}
+      PORT: 8080
+      NODE_ENV: ${NODE_ENV:-production}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:8080}
+      SECURE_COOKIE: ${SECURE_COOKIE:-false}
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-12}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-DOH Administrator}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    restart: unless-stopped
+
+volumes:
+  doh_pgdata:
