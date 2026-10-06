@@ -164,7 +164,9 @@ async function api(req,res,url){
     const body=await readJson(req);
     requireFields(body,['email','password']);
     const found=await pool.query(
-      'SELECT * FROM users WHERE lower(email)=lower($1) AND active=true',
+      `SELECT u.*,ou.name AS org_unit_name
+       FROM users u LEFT JOIN org_units ou ON ou.code=u.org_unit_code
+       WHERE lower(u.email)=lower($1) AND u.active=true`,
       [body.email.trim()],
     );
     const row=found.rows[0];
@@ -179,7 +181,7 @@ async function api(req,res,url){
     );
     res.setHeader('set-cookie',cookieHeader(token,SESSION_TTL_HOURS*3600));
     return json(res,200,{
-      user:{id:Number(row.id),email:row.email,displayName:row.display_name,role:row.role,orgUnitCode:row.org_unit_code || undefined},
+      user:{id:Number(row.id),email:row.email,displayName:row.display_name,role:row.role,orgUnitCode:row.org_unit_code || undefined,orgUnitName:row.org_unit_name || undefined},
     });
   }
 

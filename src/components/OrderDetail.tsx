@@ -34,14 +34,24 @@ export default function OrderDetail({
     setReason('');
   };
 
+  const actionsForStage: Partial<Record<WorkOrder['stage'], string[]>> = {
+    OFFICE_RECEIVED: ['RS_ACCEPT'],
+    RS_RECEIVED: ['UNIT_ACCEPT'],
+    INTERNAL_WORK: ['INTERNAL_DONE','SEND_TO_IH'],
+    IH_WAIT_RS_ACCEPT: ['RS_ACCEPT_IH'],
+    IH_WAIT_SEND: ['RS_SEND_IH'],
+    IH_WAIT_RECEIVE: ['IH_ACCEPT'],
+    IH_WORK: ['IH_DONE'],
+    IH_SUBMITTED: ['UNIT_ACCEPT_IH'],
+    UNIT_REVIEW_IH: ['UNIT_APPROVE_IH','IH_REVISION'],
+    RETURN_WAIT_RS_ACCEPT: ['RS_ACCEPT_RETURN'],
+    RETURN_RS_RECEIVED: ['SEND_SAFETY'],
+    SENT_TO_SAFETY: ['CLOSE'],
+  };
   const hasWritableStep =
     (order.stage === 'UNIT_RECEIVED' && canAssess('INITIAL')) ||
     (order.stage === 'IH_ASSESS' && canAssess('IH')) ||
-    [
-      'RS_ACCEPT','UNIT_ACCEPT','INTERNAL_DONE','SEND_TO_IH','RS_ACCEPT_IH','RS_SEND_IH',
-      'IH_ACCEPT','IH_DONE','UNIT_ACCEPT_IH','UNIT_APPROVE_IH','IH_REVISION',
-      'RS_ACCEPT_RETURN','SEND_SAFETY','CLOSE',
-    ].some(canAction);
+    (actionsForStage[order.stage] || []).some(canAction);
 
   return (
     <div>

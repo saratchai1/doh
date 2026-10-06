@@ -56,9 +56,12 @@ export const api = {
     return request<{ orders: WorkOrder[] }>('/api/work-orders');
   },
   async createOrder(payload: NewOrderPayload) {
+    const receivedAt = payload.receivedAt
+      ? new Date(`${payload.receivedAt}:00+07:00`).toISOString()
+      : undefined;
     return request<{ order: WorkOrder }>('/api/work-orders', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, receivedAt }),
     });
   },
   async action(id: string, action: string) {
