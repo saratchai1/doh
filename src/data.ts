@@ -1,0 +1,157 @@
+import { WorkOrder } from './domain';
+
+const isoDaysAgo = (days: number, hour = 9) => {
+  const d = new Date();
+  d.setHours(hour, 0, 0, 0);
+  d.setDate(d.getDate() - days);
+  return d.toISOString();
+};
+
+const isoDaysAhead = (days: number, hour = 17) => {
+  const d = new Date();
+  d.setHours(hour, 0, 0, 0);
+  d.setDate(d.getDate() + days);
+  return d.toISOString();
+};
+
+export const SAMPLE_ORDERS: WorkOrder[] = [
+  {
+    id: 'DOH-2569-001',
+    referenceNo: 'ปภ. 001/2569',
+    sourceAgency: 'สำนักอำนวยความปลอดภัย',
+    subject: 'ปรับปรุงแบบเรขาคณิตบริเวณสามแยกทางหลวง 305',
+    location: 'ทล.305 กม. 12+450 จ.นครนายก',
+    routeTeam: 'รส.สบ.1',
+    ownerUnit: 'วทบ.2',
+    stage: 'IH_WORK',
+    currentCustodian: 'In-house Consultant',
+    createdAt: isoDaysAgo(31),
+    officialDueAt: isoDaysAhead(29),
+    ihDueAt: isoDaysAhead(22),
+    ihRound: 1,
+    initialAssessment: { level: 4, assessedAt: isoDaysAgo(27), assessedBy: 'วทบ.2', reason: 'ต้องปรับแนวราบและระยะมองเห็น' },
+    ihAssessment: { level: 3, assessedAt: isoDaysAgo(8), assessedBy: 'In-house Consultant', reason: 'มีข้อมูลสำรวจครบ สามารถปรับแบบได้โดยไม่สำรวจเพิ่ม' },
+    events: [
+      { id: 'e1', type: 'CREATED', label: 'สำนักสำรวจและออกแบบรับเรื่อง', at: isoDaysAgo(31), actor: 'สารบรรณ สบ.' },
+      { id: 'e2', type: 'RECEIVED', label: 'รส.สบ.1 รับเรื่อง', at: isoDaysAgo(30), actor: 'รส.สบ.1' },
+      { id: 'e3', type: 'RECEIVED', label: 'วทบ.2 รับเรื่อง', at: isoDaysAgo(28), actor: 'วทบ.2' },
+      { id: 'e4', type: 'ASSESSED', label: 'ประเมินระดับ 4 — ซับซ้อนมาก', at: isoDaysAgo(27), actor: 'วทบ.2' },
+      { id: 'e5', type: 'IH_ASSIGNED', label: 'วทบ.2 ส่งงานออกเพื่อให้ IH ดำเนินการ', at: isoDaysAgo(14), actor: 'วทบ.2', to: 'รส.สบ.1' },
+      { id: 'e6', type: 'RECEIVED', label: 'รส.สบ.1 รับเรื่องสำหรับส่งต่อ IH', at: isoDaysAgo(12), actor: 'รส.สบ.1' },
+      { id: 'e7', type: 'SENT', label: 'รส.สบ.1 ส่งงานให้ IH', at: isoDaysAgo(10), actor: 'รส.สบ.1', to: 'In-house Consultant' },
+      { id: 'e8', type: 'RECEIVED', label: 'IH รับงานจริง', at: isoDaysAgo(9), actor: 'In-house Consultant' },
+      { id: 'e9', type: 'ASSESSED', label: 'IH ประเมินระดับ 3 — ยาก', at: isoDaysAgo(8), actor: 'In-house Consultant' },
+    ],
+  },
+  {
+    id: 'DOH-2569-002',
+    referenceNo: 'ปภ. 006/2569',
+    sourceAgency: 'สำนักอำนวยความปลอดภัย',
+    subject: 'แก้ไขแบบป้ายเตือนทางโค้งและช่องจราจร',
+    location: 'ทล.4 กม. 92+100 จ.เพชรบุรี',
+    routeTeam: 'รส.สบ.1',
+    ownerUnit: 'วทบ.4',
+    stage: 'INTERNAL_WORK',
+    currentCustodian: 'วทบ.4',
+    createdAt: isoDaysAgo(5),
+    officialDueAt: isoDaysAhead(2),
+    ihRound: 0,
+    initialAssessment: { level: 1, assessedAt: isoDaysAgo(4), assessedBy: 'วทบ.4' },
+    events: [
+      { id: 'e21', type: 'CREATED', label: 'สำนักสำรวจและออกแบบรับเรื่อง', at: isoDaysAgo(5) },
+      { id: 'e22', type: 'RECEIVED', label: 'รส.สบ.1 รับเรื่อง', at: isoDaysAgo(5) },
+      { id: 'e23', type: 'RECEIVED', label: 'วทบ.4 รับเรื่อง', at: isoDaysAgo(4) },
+      { id: 'e24', type: 'ASSESSED', label: 'ประเมินระดับ 1 — ง่าย', at: isoDaysAgo(4), actor: 'วทบ.4' },
+    ],
+  },
+  {
+    id: 'DOH-2569-003',
+    referenceNo: 'ปภ. 009/2569',
+    sourceAgency: 'สำนักอำนวยความปลอดภัย',
+    subject: 'ทบทวนแบบทางแยกเนื่องจากระยะมองเห็นไม่เพียงพอ',
+    location: 'ทล.12 กม. 44+700 จ.พิษณุโลก',
+    routeTeam: 'รส.สบ.2',
+    ownerUnit: 'วคบ.3',
+    stage: 'IH_WAIT_SEND',
+    currentCustodian: 'รส.สบ.2',
+    createdAt: isoDaysAgo(19),
+    officialDueAt: isoDaysAhead(41),
+    ihRound: 0,
+    initialAssessment: { level: 4, assessedAt: isoDaysAgo(16), assessedBy: 'วคบ.3' },
+    events: [
+      { id: 'e31', type: 'CREATED', label: 'สำนักสำรวจและออกแบบรับเรื่อง', at: isoDaysAgo(19) },
+      { id: 'e32', type: 'RECEIVED', label: 'รส.สบ.2 รับเรื่อง', at: isoDaysAgo(18) },
+      { id: 'e33', type: 'RECEIVED', label: 'วคบ.3 รับเรื่อง', at: isoDaysAgo(17) },
+      { id: 'e34', type: 'ASSESSED', label: 'ประเมินระดับ 4 — ซับซ้อนมาก', at: isoDaysAgo(16), actor: 'วคบ.3' },
+      { id: 'e35', type: 'IH_ASSIGNED', label: 'วคบ.3 ส่งงานออกเพื่อให้ IH ดำเนินการ', at: isoDaysAgo(7), actor: 'วคบ.3', to: 'รส.สบ.2' },
+      { id: 'e36', type: 'RECEIVED', label: 'รส.สบ.2 รับเรื่องสำหรับส่งต่อ IH', at: isoDaysAgo(6), actor: 'รส.สบ.2' },
+    ],
+  },
+  {
+    id: 'DOH-2569-004',
+    referenceNo: 'ปภ. 014/2569',
+    sourceAgency: 'สำนักอำนวยความปลอดภัย',
+    subject: 'ปรับตำแหน่งเกาะกลางและจุดกลับรถ',
+    location: 'ทล.2 กม. 165+300 จ.นครราชสีมา',
+    routeTeam: 'รส.สบ.3',
+    ownerUnit: 'วมบ.',
+    stage: 'RETURN_WAIT_RS_ACCEPT',
+    currentCustodian: 'รส.สบ.3',
+    createdAt: isoDaysAgo(48),
+    officialDueAt: isoDaysAgo(18),
+    ihRound: 0,
+    initialAssessment: { level: 3, assessedAt: isoDaysAgo(47), assessedBy: 'วมบ.' },
+    events: [
+      { id: 'e41', type: 'CREATED', label: 'สำนักสำรวจและออกแบบรับเรื่อง', at: isoDaysAgo(48) },
+      { id: 'e42', type: 'RECEIVED', label: 'รส.สบ.3 รับเรื่อง', at: isoDaysAgo(47) },
+      { id: 'e43', type: 'RECEIVED', label: 'วมบ. รับเรื่อง', at: isoDaysAgo(47) },
+      { id: 'e44', type: 'ASSESSED', label: 'ประเมินระดับ 3 — ยาก', at: isoDaysAgo(47), actor: 'วมบ.' },
+      { id: 'e45', type: 'SENT', label: 'วมบ. ดำเนินการเสร็จและส่งออก', at: isoDaysAgo(2), actor: 'วมบ.', to: 'รส.สบ.3' },
+    ],
+  },
+  {
+    id: 'DOH-2569-005',
+    referenceNo: 'ปภ. 021/2569',
+    sourceAgency: 'สำนักอำนวยความปลอดภัย',
+    subject: 'ทบทวนตำแหน่งไฟสัญญาณและระยะหยุดรถ',
+    location: 'ทล.35 กม. 23+800 จ.สมุทรสาคร',
+    routeTeam: 'รส.สบ.4',
+    ownerUnit: 'ผถบ.',
+    stage: 'SENT_TO_SAFETY',
+    currentCustodian: 'สำนักอำนวยความปลอดภัย',
+    createdAt: isoDaysAgo(13),
+    officialDueAt: isoDaysAhead(8),
+    ihRound: 0,
+    initialAssessment: { level: 2, assessedAt: isoDaysAgo(13), assessedBy: 'ผถบ.' },
+    events: [
+      { id: 'e51', type: 'CREATED', label: 'สำนักสำรวจและออกแบบรับเรื่อง', at: isoDaysAgo(13) },
+      { id: 'e52', type: 'RECEIVED', label: 'รส.สบ.4 รับเรื่อง', at: isoDaysAgo(12) },
+      { id: 'e53', type: 'RECEIVED', label: 'ผถบ. รับเรื่อง', at: isoDaysAgo(12) },
+      { id: 'e54', type: 'ASSESSED', label: 'ประเมินระดับ 2 — ปานกลาง', at: isoDaysAgo(12), actor: 'ผถบ.' },
+      { id: 'e55', type: 'SENT', label: 'ผถบ. ดำเนินการเสร็จและส่งออก', at: isoDaysAgo(4), actor: 'ผถบ.', to: 'รส.สบ.4' },
+      { id: 'e56', type: 'RECEIVED', label: 'รส.สบ.4 รับงานกลับ', at: isoDaysAgo(3), actor: 'รส.สบ.4' },
+      { id: 'e57', type: 'SENT', label: 'รส.สบ.4 ส่งกลับสำนักอำนวยความปลอดภัย', at: isoDaysAgo(1), actor: 'รส.สบ.4', to: 'สำนักอำนวยความปลอดภัย' },
+    ],
+  },
+  {
+    id: 'DOH-2569-006',
+    referenceNo: 'ปภ. 024/2569',
+    sourceAgency: 'สำนักอำนวยความปลอดภัย',
+    subject: 'แก้ไขแบบบริเวณทางร่วมเข้าโรงเรียน',
+    location: 'ทล.340 กม. 31+200 จ.สุพรรณบุรี',
+    routeTeam: 'รส.สบ.2',
+    ownerUnit: 'วคบ.1',
+    stage: 'CLOSED',
+    currentCustodian: 'ปิดงาน',
+    createdAt: isoDaysAgo(40),
+    officialDueAt: isoDaysAgo(19),
+    ihRound: 0,
+    initialAssessment: { level: 2, assessedAt: isoDaysAgo(39), assessedBy: 'วคบ.1' },
+    events: [
+      { id: 'e61', type: 'CREATED', label: 'สำนักสำรวจและออกแบบรับเรื่อง', at: isoDaysAgo(40) },
+      { id: 'e62', type: 'ASSESSED', label: 'ประเมินระดับ 2 — ปานกลาง', at: isoDaysAgo(39), actor: 'วคบ.1' },
+      { id: 'e63', type: 'SENT', label: 'รส.สบ.2 ส่งกลับสำนักอำนวยความปลอดภัย', at: isoDaysAgo(24), actor: 'รส.สบ.2' },
+      { id: 'e64', type: 'CLOSED', label: 'ยืนยันรับและปิดงาน', at: isoDaysAgo(23), actor: 'สำนักอำนวยความปลอดภัย' },
+    ],
+  },
+];

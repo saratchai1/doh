@@ -1,0 +1,22 @@
+.loading-screen,.login-page{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#edf3fb,#fff9d8)}
+.loading-screen{gap:14px;align-content:center;color:#173a71}
+.login-card{width:min(720px,100%);background:#fff;border:1px solid #dfe6ef;border-radius:22px;box-shadow:0 28px 80px rgba(16,47,93,.14);overflow:hidden}
+.login-brand{display:flex;gap:18px;align-items:flex-start;padding:30px 32px 22px;background:linear-gradient(135deg,#173a71,#234f91);color:#fff;border-bottom:5px solid #ffdc00}
+.login-brand .eyebrow{color:#ffec72}
+.login-brand h1{margin:5px 0 7px;font-size:28px;line-height:1.25}
+.login-brand p{margin:0;opacity:.8}
+.brand-mark.large{width:62px;height:62px;min-width:62px;font-size:20px}
+.login-form{padding:26px 32px;display:grid;gap:15px}
+.login-form label{font-size:13px;font-weight:700;color:#526177}
+.login-form input{margin-top:7px}
+.login-submit{width:100%;margin-top:4px}
+.login-note{display:block;padding:0 32px 26px;color:#8a96a8;line-height:1.5}
+.user-chip{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:3px 8px;min-width:120px}
+.user-chip strong{font-size:12px}
+.user-chip span{font-size:11px;opacity:.72;margin-top:2px}
+.error-banner{border:1px solid #fecaca;background:#fff1f2;color:#9f1239;border-radius:10px;padding:10px 12px;font-size:13px}
+.workspace-error{margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.workspace-error button{border:0;background:transparent;color:inherit;font-size:20px;cursor:pointer}
+.readonly-note{font-size:13px;color:#667085;background:#f4f6f8;border-radius:9px;padding:9px 11px}
+button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:760px){.login-brand{padding:24px 20px}.login-brand h1{font-size:22px}.login-form{padding:22px 20px}.login-note{padding:0 20px 22px}.user-chip{align-items:flex-start;padding-left:0}.top-actions{justify-content:flex-start}}
